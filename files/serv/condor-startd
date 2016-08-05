@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# chkconfig: 35 90 12
+# description: Condor startd
+#
+# Get function from functions library
+#. /etc/init.d/functions
+# Start the daemon
+stat=0
+
+start() {
+        echo -n "Starting condor_startd: "
+        if [ -e /var/lock/condor_startd ]
+        then
+          echo -n "condor_startd already running"
+        else
+          touch /var/lock/condor_startd
+          /usr/sbin/condor_startd &
+          echo -n "condor_startd started successfully"
+        fi
+        echo
+}
+# Stop the service
+stop() {
+        echo -n "Stopping condor_startd: "
+        pkill condor_startd
+        ### Now, delete the lock file ###
+        rm -f /var/lock/condor_startd
+        echo -n "condor_startd stopped successfully"
+        echo
+}
+status() {
+        pidof condor_startd
+        if [ $? -ne 0 ]
+        then
+          echo -n "condor_startd is not running, "
+          stat=1
+        else
+          echo -n "condor_startd is running, "
+        fi
+
+        if [ -e /var/lock/condor_startd ]
+        then
+          echo -n "lockfile present"
+        else
+          echo -n "lockfile not present"
+        fi
+        
+        echo
+}
+### main logic ###
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status
+        ;;
+  restart|reload|condrestart)
+        stop
+        start
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|reload|status}"
+        exit 1
+esac
+exit $stat
