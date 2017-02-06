@@ -89,7 +89,7 @@ PROCD_ADDRESS = $(RUN)/procd_pipe
 
 ##  What machine is your central manager?
 
-CONDOR_HOST = 10.0.72.17
+CONDOR_HOST = 10.0.72.94
 COLLECTOR_HOST = $(CONDOR_HOST):4080?sock=collector
 SCHEDD_HOST = $(CONDOR_HOST)
 
