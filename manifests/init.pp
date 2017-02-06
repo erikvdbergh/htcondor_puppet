@@ -16,7 +16,7 @@
 #
 # default $type is 'compute'
 
-class htcondor ( $type = 'compute') {
+class htcondor ( $type = 'compute', $net_interface = 'eth0') {
   
   # Add the htcondor repo and key, so we can install via apt
   apt::source { 'htcondor_repo':
@@ -46,7 +46,63 @@ class htcondor ( $type = 'compute') {
     }
     file { '/etc/condor/condor_config':
       ensure => present,
-      source => "puppet:///modules/htcondor/conf/condor_${type}_conf",
+      content => @("END")
+        RELEASE_DIR = /usr
+
+	LOCAL_DIR = /var
+
+	LOCAL_CONFIG_FILE = /etc/condor/condor_config.local
+	REQUIRE_LOCAL_CONFIG_FILE = false
+
+	LOCAL_CONFIG_DIR = /etc/condor/config.d
+
+	ALLOW_READ            = *
+	ALLOW_WRITE           = *
+	ALLOW_ADMINISTRATOR   = *
+	ALLOW_CONFIG          = *
+	ALLOW_NEGOTIATOR      = *
+	ALLOW_DAEMON          = *
+
+	HOSTALLOW_READ = 
+	HOSTALLOW_WRITE = 
+	HOSTALLOW_DAEMON = 
+	HOSTALLOW_NEGOTIATOR = 
+	HOSTALLOW_ADMINISTRATOR = 
+	HOSTALLOW_OWNER = 
+
+	BIND_ALL_INTERFACES = False
+	NETWORK_INTERFACE = $net_interface
+
+	RUN     = $(LOCAL_DIR)/run/condor
+	LOG     = $(LOCAL_DIR)/log/condor
+	LOCK    = $(LOCAL_DIR)/lock/condor
+	SPOOL   = $(LOCAL_DIR)/lib/condor/spool
+	EXECUTE = $(LOCAL_DIR)/lib/condor/execute
+	BIN     = $(RELEASE_DIR)/bin
+	LIB     = $(RELEASE_DIR)/lib/condor
+	INCLUDE = $(RELEASE_DIR)/include/condor
+	SBIN    = $(RELEASE_DIR)/sbin
+	LIBEXEC = $(RELEASE_DIR)/lib/condor/libexec
+	SHARE   = $(RELEASE_DIR)/share/condor
+
+	PROCD_ADDRESS = $(RUN)/procd_pipe
+
+	CONDOR_HOST = 10.0.72.94
+	COLLECTOR_HOST = $(CONDOR_HOST):4080?sock=collector
+	SCHEDD_HOST = $(CONDOR_HOST)
+
+	SLOT_TYPE_1 = cpus=100%,disk=100%,swap=100%
+	SLOT_TYPE_1_PARTITIONABLE = True
+
+	NUM_SLOTS_TYPE_1 = 1
+
+	DAEMON_LIST = MASTER,STARTD
+
+	LOWPORT = 5000
+	HIGHPORT = 6000
+
+	DOCKER = /usr/bin/docker
+	| END
       notify => Service['condor'],
     }
   } 
