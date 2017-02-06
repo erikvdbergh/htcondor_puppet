@@ -44,10 +44,12 @@ class htcondor ( $type = 'compute', $net_interface = 'eth0') {
     service { 'condor':
       ensure  => running,
     }
+
+
     file { '/etc/condor/condor_config':
       ensure => present,
-      $condor_conf = @("END")
-        RELEASE_DIR = /usr
+      content => @("END")
+	RELEASE_DIR = /usr
 
 	LOCAL_DIR = /var
 
@@ -103,7 +105,7 @@ class htcondor ( $type = 'compute', $net_interface = 'eth0') {
 
 	DOCKER = /usr/bin/docker
 	| END
-      content => $condor_conf,
+	,
       notify => Service['condor'],
     }
   } 
